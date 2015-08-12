@@ -32,8 +32,8 @@ static void generic_simulator()
         /* do useful work; check for incoming messages to the objects we
          * registered earlier */
         cout << "SimB: Working. Time is " << time_current << endl;
-        fncs::publish("simObjB.attribute", "value");
-        fncs::route("simObjB", "simObjA", "key", "value");
+        fncs::publish("object.attribute", "value");
+        fncs::route("endpointB", "endpointA", "key", "value");
 
         /* Check for incoming messages. */
         vector<string> events = fncs::get_events();
