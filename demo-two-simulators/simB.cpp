@@ -33,7 +33,6 @@ static void generic_simulator()
          * registered earlier */
         cout << "SimB: Working. Time is " << time_current << endl;
         fncs::publish("object.attribute", "value");
-        fncs::route("endpointB", "endpointA", "key", "value");
 
         /* Check for incoming messages. */
         vector<string> events = fncs::get_events();
@@ -50,7 +49,7 @@ static void generic_simulator()
         /* Which time step do we wish to go to next? This does not
          * necessarily need to be a delta of 1; FNCS supports
          * arbitrary time deltas. */
-        time_desired = time_current + 1;
+        time_desired = time_current + 2;
 
         /* Synchronization by requesting the next time step. The next
          * time could very well be smaller than this simulator is able
