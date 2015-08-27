@@ -33,7 +33,8 @@ static void generic_simulator()
          * registered earlier */
         cout << "SimA: Working. Time is " << time_current << endl;
         fncs::publish("object.attribute", "value");
-        fncs::route("endpointA", "endpointB", "key", "value");
+        fncs::publish("this.will.be.dropped", "value");
+        fncs::route("endpointX", "endpointY", "key", "value");
 
         /* Check for incoming messages. */
         vector<string> events = fncs::get_events();

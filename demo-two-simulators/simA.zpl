@@ -5,4 +5,4 @@ values
     key
         topic = simB/object.attribute
     end
-        topic = simB/endpointB:endpointA/key
+        topic = simA/endpointX:endpointY/key

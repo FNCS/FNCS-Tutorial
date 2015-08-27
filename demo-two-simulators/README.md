@@ -12,6 +12,7 @@ power simulator applications.
 - [Important Environment Variables](#important-environment-variables)
 - [Model Description](#model-description)
 - [Running the Co-Simulation](#running-the-co-simulation)
+- [Expected Output](#expected-output)
 
 ## Hardware Requirements
 [back to contents](#table-of-contents)
@@ -74,13 +75,13 @@ Get the ZeroMQ software and install it using the following steps:
 cd $HOME
 
 # download zeromq
-wget http://download.zeromq.org/zeromq-3.2.4.tar.gz
+wget http://download.zeromq.org/zeromq-3.2.5.tar.gz
 # if you do not have wget, use
-# curl -O http://download.zeromq.org/zeromq-3.2.4.tar.gz
+# curl -O http://download.zeromq.org/zeromq-3.2.5.tar.gz
 
 # unpack zeromq, change to its directory
-tar -xzf zeromq-3.2.4.tar.gz
-cd zeromq-3.2.4
+tar -xzf zeromq-3.2.5.tar.gz
+cd zeromq-3.2.5
 
 # configure, make, and make install 
 ./configure --prefix=$FNCS2_INSTALL
@@ -105,13 +106,16 @@ installed ZeroMQ as written above, the following will work for you.
 cd $HOME
 
 # download czmq
-wget http://download.zeromq.org/czmq-3.0.0-rc1.tar.gz
+wget https://github.com/zeromq/czmq/archive/v3.0.2.tar.gz
 # if you do not have wget, use
-# curl -O http://download.zeromq.org/czmq-3.0.0-rc1.tar.gz
+# curl -O https://github.com/zeromq/czmq/archive/v3.0.2.tar.gz
 
 # unpack czmq, change to its directory
-tar -xzf czmq-3.0.0-rc1.tar.gz
-cd czmq-3.0.0
+tar -xzf czmq-3.0.2.tar.gz
+cd czmq-3.0.2
+
+# czmq sources do not have a configure script pre-generated, so run
+./autogen.sh
 
 # configure, make, and make install
 ./configure --prefix=$HOME/FNCS2_install --with-libzmq=$HOME/FNCS2_install
@@ -147,7 +151,7 @@ git clone https://github.com/GridOPTICS/FNCS2
 cd FNCS2
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL --with-zmq=$FNCS2_INSTALL
+./configure --prefix=$FNCS2_INSTALL --with-zmq=$FNCS2_INSTALL --with-czmq=$FNCS2_INSTALL
 make
 make install
 ```
@@ -199,118 +203,19 @@ In this current tutorial directory you will find two source files,
 We have set up the co-sim to use two generic simulators, namely "A" and
 "B". "A" publishes certain object state at each time step for any
 interested subscriber to listen to. "A" also mimics two endpoints
-communicating by sending a message "from" a named endpoint in simulator
-A to a named endpoint in simulator B. This behavior is useful when
+communicating by sending a message "from" a named endpoint ("endpointX")
+to a named endpoint ("endpointY"). This behavior is useful when
 integrating a communication network simulator in a later demo.
 
 ### A Complete Breakdown of our First Simulator
-Let's look at [simA.cpp](simA.cpp) in detail.  We've attempted to insert
-comments step by step to make the file self-documenting as a reference.
-You should start by reading the file line by line. We will highlight
-important code for you in the next section of this tutorial. Here is
-what the file recently looked like, but please refer to the original
-file as linked above.
-
-```c++
-/* C++ STL */
-#include <iostream>
-
-/* FNCS headers */
-#include <fncs.hpp>
-
-using namespace std; /* C++ standard namespace */
-
-/* some C++ compilers have a nullptr instance,
- * otherwise we fall back to the old default of NULL */
-#ifndef nullptr 
-#define nullptr NULL
-#endif
-
-/* the current time of our simulator */
-static fncs::time time_current=0;
-/* time when sim will stop */
-static fncs::time time_stop=10;
-
-/* our simulator function, called by the main() function later */
-static void generic_simulator()
-{
-    fncs::time time_granted=0; /* the time step FNCS has allowed us to process */
-    fncs::time time_desired=0; /* the time step we would like to go to next */
-
-    /* initialize FNCS with default configuration file fncs.zpl */
-    fncs::initialize();
-
-    /* unless FNCS detects another simulator terminates early, the
-     * this simulator will run from time step 0 to time step 9 */
-    while (time_current < time_stop) {
-        /* do useful work; check for incoming messages to the objects we
-         * registered earlier */
-        cout << "SimA: Working. Time is " << time_current << endl;
-        fncs::publish("simObjA.attribute", "value");
-        fncs::route("simObjA", "simObjB", "key", "value");
-
-        /* Check for incoming messages. */
-        vector<string> events = fncs::get_events();
-        for (vector<string>::iterator key=events.begin();
-                key!=events.end(); ++key) {
-            cout << "SimA: received topic '"
-                << *key
-                << "' with value '"
-                << fncs::get_value(*key)
-                << "'"
-                << endl;
-        }
-
-        /* Which time step do we wish to go to next? This does not
-         * necessarily need to be a delta of 1; FNCS supports
-         * arbitrary time deltas. */
-        time_desired = time_current + 1;
-
-        /* Synchronization by requesting the next time step. The next
-         * time could very well be smaller than this simulator is able
-         * to process i.e. the network simulator runs in nanoseconds
-         * while this simulator runs in seconds. In such a case, the
-         * time_granted will be the same as time_current. Another
-         * possibility is that the time_granted is less than
-         * time_desired due to another simulator requesting a smaller
-         * time delta. */
-        time_granted = fncs::time_request(time_desired);
-
-        cout << "SimA: time_request"
-            << " current=" << time_current
-            << " desired=" << time_desired
-            << " granted=" << time_granted << endl;
-
-        time_current = time_granted;
-    }
-    cout << "SimA: DONE!" << endl;
-
-    fncs::finalize();
-}
-
-
-/* a simple main that calls our simulator function;
- * it is sometimes useful to capture and report exceptions but this
- * might be overkill for your particular needs */
-int main(int argc, char **argv)
-{
-    try {
-        cout << "starting generic simulator" << endl;
-        generic_simulator();
-    } catch (const exception &e) {
-        cout << e.what() << endl;
-    }
-    catch (const string &e) {
-        cout << e << endl;
-    }
-    cout << "finished generic simulator" << endl;
-    return 0;
-}
-```
+You should really take a look at [simA.cpp](simA.cpp) in detail.  We've
+attempted to insert comments step by step to make the file
+self-documenting as a reference.  You should start by reading the file
+line by line.
 
 #### Boilerplate Setup and Teardown
 You'll notice there is quite a bit of "boilerplate" code -- code
-necessary for simply setting up the simulator and its FNCS connection.
+necessary for simply setting up the simulator and its FNCS2 connection.
 All simulators need the following:
 - A way to tell current simulator time
 - fncs::initialize()
@@ -318,7 +223,7 @@ All simulators need the following:
 - fncs::finalize()
 
 Those are the necessities -- you don't even have to publish values --
-your simulator could simply keep in synch with the other simulators but
+your simulator could simply keep in sync with the other simulators but
 otherwise hang out on its own and never communicate (but that's not
 terribly useful.)
 
@@ -378,13 +283,13 @@ We need to create a working directory for our co-simulation. Each
 simulator software package will generate output files, as usual, to the
 current working directory. In addition, each example simulator has
 diagnostic output to standard output (the terminal). The simulators are
-designed to locate files from the working directory, for example, as
-inputs. Please use this current tutorial directory as a working
-directory for the co-simulation run.  
+designed to locate files from the working directory, for example the ZPL
+configuration file, as inputs. Please use this current tutorial
+directory as a working directory for the co-simulation run.  
 
 In this directory you will find only a few files since our simulators
 are rather simple.  You will find the necessary ZPL files that each
-simulator needs to pass information to the FNCS library during
+simulator needs to pass information to the FNCS2 library during
 initialization.  There is also a handy script file for starting the
 co-simulation [run.sh](run.sh).  All runtime files will be described in
 detail next.
@@ -403,6 +308,22 @@ received out of order. The [run.sh](run.sh) file isn't anything special,
 but it does at least execute the "fncs_broker" application with the
 correct number of simulators expected (2). The total number of
 simulators connecting to the broker is its only parameter.
+
+## Expected Output
+[back to contents](#table-of-contents)
+
+Please note that this is a simplified co-simulation meant to demonstrate
+how to use FNCS2. As such, the output will verify that FNCS2 is working
+correctly. The generated stdout file simB.out shows that the simulator
+was interrupted when a new message arrived -- simB continuously requests
+to step forward two time steps, but the request returns the next
+smallest time step supported by simB. simA subscribes to the
+object.attribute coming from simB, as well as to its own route message.
+Simulators are free to subscribe to their own messages as well as those
+from other simulators. simB does not subscribe to the route message from
+simA and therefore it is not received by simB. Also note that the published
+value 'this.will.be.dropped' from simA, since it is not subscribed to in
+any simulator, will silently be dropped.
 
 ## FAQ/Troubleshooting
 Q: What happens when you specify 3 to the fncs_broker instead of 2?
