@@ -21,7 +21,6 @@
 #include "ns3/applications-module.h"
 #include "ns3/nix-vector-routing-module.h"
 #include "ns3/mobility-module.h"
-#include "ns3/random-variable.h"
 #include "ns3/csma-module.h"
 #include "ns3/point-to-point-dumbbell.h"
 #include "ns3/bridge-helper.h"
@@ -30,7 +29,9 @@
 #include "ns3/wimax-helper.h"
 #include "ns3/lte-helper.h"
 #include "ns3/ipv4.h"
-#include "ns3/fncs.h"
+#include "ns3/fncs-application.h"
+#include "ns3/fncs-application-helper.h"
+#include "ns3/fncs-simulator-impl.h"
 
 #include <cstdlib>
 #include <vector>
@@ -111,8 +112,8 @@ main (int argc, char *argv[])
 #endif
     int createNodes=(totalNumberOfNodes/20)+1; //we create groups of 20 nodes;
 
-    FncsSimulator *hb=new FncsSimulator();
-    Ptr<FncsSimulator> hb2(hb);
+    FncsSimulatorImpl *hb=new FncsSimulatorImpl();
+    Ptr<FncsSimulatorImpl> hb2(hb);
     hb->Unref();
 
     Simulator::SetImplementation(hb2);
@@ -120,7 +121,7 @@ main (int argc, char *argv[])
     Ipv4NixVectorHelper nixRouting;
     Ipv4StaticRoutingHelper staticRouting;
 
-    LogComponentEnable ("FNCSApplication", LOG_LEVEL_INFO);
+    LogComponentEnable ("FncsApplication", LOG_LEVEL_INFO);
 
 
     Ipv4AddressHelper addresses;
@@ -228,11 +229,11 @@ main (int argc, char *argv[])
     }
 
 
-    FNCSApplicationHelper help;
+    FncsApplicationHelper help(networks[0]->nodeNamePrefixes, networks[0]->numberofnodes);
     /* Passes the names of all nodes/objects on the network, and list of all nodes*/ 
     /* Calls fncs application helper object ( defined in ns3home/src/applications/helper/fncsApplicationHelper.
      * This creates a map of (name,ipaddreses) and links it to the list <FNCS_applications> contained in teh ApplicationContainer fncsaps */
-    ApplicationContainer fncsaps= help.SetApps(names,gldnodes, marketToControllerMap);
+    ApplicationContainer fncsaps= help.Install(gldnodes);
     fncsaps.Start (Seconds (0.0));
     fncsaps.Stop (Seconds (259200.0));
 
