@@ -1,0 +1,11 @@
+route "presync:MarkNIF1.current_market.clearing_price -> F1_single_ramp_NIF_1/var1; 0";
+route "presync:MarkNIF1.market_id -> F1_single_ramp_NIF_1/var2; 0";
+route "presync:MarkNIF1.current_price_mean_1h -> F1_single_ramp_NIF_1/var3; 0";
+route "presync:MarkNIF1.current_price_stdev_1h -> F1_single_ramp_NIF_1/var4; 0";
+route "function:controller/submit_bid_state -> auction/submit_bid_state";
+subscribe "function:auction/submit_bid_state <- ns3/GLD1/F1_single_ramp_NIF_1@MarkNIF1/submit_bid_state";
+subscribe "presync:F1_single_ramp_NIF_1.proxy_clear_price <- ns3/GLD1/MarkNIF1@F1_single_ramp_NIF_1/var1";
+subscribe "presync:F1_single_ramp_NIF_1.proxy_market_id <- ns3/GLD1/MarkNIF1@F1_single_ramp_NIF_1/var2";
+subscribe "presync:F1_single_ramp_NIF_1.proxy_average <- ns3/GLD1/MarkNIF1@F1_single_ramp_NIF_1/var3";
+subscribe "presync:F1_single_ramp_NIF_1.proxy_standard_deviation <- ns3/GLD1/MarkNIF1@F1_single_ramp_NIF_1/var4";
+option "transport:hostname localhost, port 5570";
