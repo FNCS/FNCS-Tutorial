@@ -228,8 +228,8 @@ main (int argc, char *argv[])
         }
     }
 
-
-    FncsApplicationHelper help(networks[0]->nodeNamePrefixes, networks[0]->numberofnodes);
+    /* the '1' below is the offset where number of nodes begins */
+    FncsApplicationHelper help(networks[0]->nodeNamePrefixes, 1);
     /* Passes the names of all nodes/objects on the network, and list of all nodes*/ 
     /* Calls fncs application helper object ( defined in ns3home/src/applications/helper/fncsApplicationHelper.
      * This creates a map of (name,ipaddreses) and links it to the list <FNCS_applications> contained in teh ApplicationContainer fncsaps */
