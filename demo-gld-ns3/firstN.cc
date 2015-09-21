@@ -190,7 +190,7 @@ main (int argc, char *argv[])
     NodeContainer gldnodes;
 
     //mark market nodes for fncs app installation.
-    gldnodes.Add(markCon);
+    //gldnodes.Add(markCon);
     //gldnodes.Add(csma[0].Get(21));
 
     {
@@ -234,6 +234,15 @@ main (int argc, char *argv[])
     /* Calls fncs application helper object ( defined in ns3home/src/applications/helper/fncsApplicationHelper.
      * This creates a map of (name,ipaddreses) and links it to the list <FNCS_applications> contained in teh ApplicationContainer fncsaps */
     ApplicationContainer fncsaps= help.Install(gldnodes);
+    {
+        size_t index = 0;
+        for (NodeContainer::Iterator i = markCon.Begin();
+                i != markCon.End();
+                ++i)
+        {
+            fncsaps.Add(help.Install(*i, networks[index++]->marketname));
+        }
+    }
     fncsaps.Start (Seconds (0.0));
     fncsaps.Stop (Seconds (259200.0));
 
