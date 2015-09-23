@@ -18,3 +18,4 @@ else
     export PATH="$FNCS2_INSTALL/bin:$PATH"
 fi
 
+export FNCS_FATAL=yes

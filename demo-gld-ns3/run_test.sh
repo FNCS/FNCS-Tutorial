@@ -26,10 +26,12 @@ export FNCS_LOG_STDOUT=no
 export FNCS_LOG_FILE=yes
 
 # run ns3 in separate window
+export FNCS_CONFIG_FILE=test_fncs_msg_client.zpl
 xterm -e ./firstN LinkModelGLDNS3.txt &
 
 # run gld in separate window
-xterm -e gridlabd fncs_GLD_300node_Feeder_1.glm &
+unset FNCS_CONFIG_FILE
+xterm -e gridlabd test_fncs_msg_client.glm &
 
 # run fncs_broker in separate window
 xterm -e fncs_broker 2 &

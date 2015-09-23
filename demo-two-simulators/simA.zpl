@@ -4,5 +4,4 @@ broker = tcp://localhost:5570
 values
     key
         topic = simB/object.attribute
-    end
-        topic = simA/endpointX:endpointY/key
+    end = simA/endpointX@endpointY/key
