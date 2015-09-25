@@ -46,13 +46,15 @@ struct MarketModel{
     string nodeNamePrefixes;
     string connectedBus;
     int numberofnodes;
+    int numberofgroups;
     string marketname;       
+    vector<NodeContainer> csma;
+    NodeContainer market;
 };
 
-vector<MarketModel*> parseLinkModel(string name, int &totalNumberOfNodes){
+vector<MarketModel*> parseLinkModel(string name) {
 
     vector<MarketModel*> toReturn;
-    totalNumberOfNodes=0;
     ifstream inputFile(name.c_str());
     if(!inputFile.good())
         throw std::invalid_argument("Cannot open file!");
@@ -60,30 +62,20 @@ vector<MarketModel*> parseLinkModel(string name, int &totalNumberOfNodes){
     MarketModel *toAdd;
     while(!inputFile.eof()){
         toAdd=new MarketModel();
-        inputFile >> toAdd->numberofnodes >> toAdd->marketname >> toAdd->nodeNamePrefixes >> toAdd->connectedBus;
+        inputFile >> toAdd->numberofnodes
+            >> toAdd->marketname
+            >> toAdd->nodeNamePrefixes
+            >> toAdd->connectedBus;
+        toAdd->numberofgroups = (toAdd->numberofnodes+19)/20;
         if(toAdd->numberofnodes==0) //ifstream zicti
             continue;
-        totalNumberOfNodes+=toAdd->numberofnodes;
         toReturn.push_back(toAdd);
     }
     return toReturn; 
 
 }
 
-map<string, string> getMarketControllerMap(vector<MarketModel *> networks){
-    map<string, string> MarketToControllerMap;
-
-    MarketModel *market;
-    string mName, nodePrefix;
-    // Assuming market names are going to be unique
-    for( int i =0; i < networks.size(); i++) {
-        market = networks[i];
-        MarketToControllerMap[networks[i]->marketname] = networks[i]->nodeNamePrefixes;
-    }
-    return MarketToControllerMap;
-}
-    int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
     if(argc < 2){
         cout << "Usage ./first <power grid link model file name>" << endl;
@@ -100,155 +92,112 @@ main (int argc, char *argv[])
      * the busid of the bus, market is connected to
      */
     /* totalNumberOfNodes is the sum of size of all market model */
-    vector<MarketModel *> networks=parseLinkModel(string(argv[1]),totalNumberOfNodes);
+    vector<MarketModel *> networks = parseLinkModel(string(argv[1]));
 
-    cout << "Creating " << networks.size() << " networks with " << totalNumberOfNodes << " nodes in total" << endl;
-
-    map<string, string> marketToControllerMap = getMarketControllerMap(networks);
-#if 0
-    for(map<string, string>::iterator it=marketToControllerMap.begin(); it!=marketToControllerMap.end(); it++){
-        cout<<" For market " << it->first << " , nodePrefix = " << it->second << "\n";
+    cout << "Creating " << networks.size() << " networks." << endl;
+    for (size_t i=0; i<networks.size(); ++i) {
+        cout << "Network " << i << ": "
+            << networks[i]->numberofgroups << " groups of "
+            << networks[i]->numberofnodes << " nodes total" << endl;
+        totalNumberOfNodes += networks[i]->numberofnodes;
+        if (networks[i]->numberofgroups > 255) {
+            cerr << "too many groups" << endl;
+            return EXIT_FAILURE;
+        }
     }
-#endif
-    int createNodes=(totalNumberOfNodes/20)+1; //we create groups of 20 nodes;
+    cout << "Total number of nodes is " << totalNumberOfNodes << "." << endl;
 
     FncsSimulatorImpl *hb=new FncsSimulatorImpl();
     Ptr<FncsSimulatorImpl> hb2(hb);
     hb->Unref();
-
     Simulator::SetImplementation(hb2);
-
-    Ipv4NixVectorHelper nixRouting;
-    Ipv4StaticRoutingHelper staticRouting;
 
     LogComponentEnable ("FncsApplication", LOG_LEVEL_INFO);
 
-
+    Ipv4NixVectorHelper nixRouting;
+    Ipv4StaticRoutingHelper staticRouting;
     Ipv4AddressHelper addresses;
-
     InternetStackHelper ihelper;
-
     Ipv4ListRoutingHelper list; 
     list.Add (staticRouting, 0); 
     list.Add (nixRouting, 10);
-
     ihelper.SetRoutingHelper (list);
 
-    /*Create CMSA nodes*/
-    NodeContainer csma[createNodes],markCon;
-
-    for(int i=0;i<createNodes;i++){
-        csma[i].Create(21);
-    }
-    //create market
-    markCon.Create(networks.size());
-
-    ihelper.Install(markCon);
     CsmaHelper chelper;
-
     chelper.SetChannelAttribute ("DataRate", DataRateValue (10000000));
     chelper.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (3)));
 
+    ApplicationContainer fncsaps;
 
-    NetDeviceContainer csmaDevices[createNodes];
+    /* Create the various networks. */
+    for (size_t netIndex=0; netIndex<networks.size(); ++netIndex)
+    {
+        /* First step is to create all of the nodes, the basic building
+         * block of ns-3. Each network splits the nodes into groups of
+         * 20. A 21st node is for the point-to-point connection back to
+         * the market. */
+        MarketModel *model = networks[netIndex];
+        int groups = model->numberofgroups;
+        model->csma.resize(groups);
+        for (int csmaIndex=0; csmaIndex<groups; ++csmaIndex) {
+            model->csma[csmaIndex].Create(21);
+        }
+        model->market.Create(1);
 
-    for(int i=0;i<createNodes;i++){
-        stringstream ip;
-        ip << "10." << i/255 << "." << i%255 << ".0";
-        cout << ip.str() << endl;
+        ihelper.Install(model->market);
 
-        csmaDevices[i]=chelper.Install(csma[i]);
+        NetDeviceContainer csmaDevices[groups];
 
-        ihelper.Install(csma[i]);
-        addresses.SetBase(ip.str().c_str(),"255.255.255.0");
-        addresses.Assign(csmaDevices[i]);
-        ip.str(string());
-    }
-
-    PointToPointHelper phelper3;
-    phelper3.SetDeviceAttribute ("DataRate", StringValue ("4Mbps"));
-    phelper3.SetChannelAttribute ("Delay", StringValue ("2ms"));
-
-    //connect market nodes to csma nodes.
-    cout << "market node IP addresses" << endl;
-    for(int j=0;j<networks.size();j++){
-        for(int i=0;i<createNodes;i++){
+        for(int i=0;i<groups;i++){
             stringstream ip;
-            ip << 11+j << "." << i/255 << "." << i%255 << ".0";
+            ip << "10." << netIndex << "." << i << ".0";
             cout << ip.str() << endl;
 
-            NetDeviceContainer csma1dbell1=phelper3.Install(markCon.Get(j),csma[i].Get(0));
+            csmaDevices[i] = chelper.Install(model->csma[i]);
+
+            ihelper.Install(model->csma[i]);
+            addresses.SetBase(ip.str().c_str(),"255.255.255.0");
+            addresses.Assign(csmaDevices[i]);
+            ip.str(string());
+        }
+
+        PointToPointHelper phelper3;
+        phelper3.SetDeviceAttribute ("DataRate", StringValue ("4Mbps"));
+        phelper3.SetChannelAttribute ("Delay", StringValue ("2ms"));
+
+        //connect market nodes to csma nodes.
+        cout << "market node IP addresses" << endl;
+        for(int i=0;i<groups;i++){
+            stringstream ip;
+            ip << "11." << netIndex << "." << i << ".0";
+            cout << ip.str() << endl;
+
+            NetDeviceContainer csma1dbell1=phelper3.Install(
+                    model->market.Get(0), model->csma[i].Get(0));
 
             addresses.SetBase(ip.str().c_str(),"255.255.255.0");
             addresses.Assign(csma1dbell1);
 
             ip.str(string());
-
         }
-    }
 
-
-    //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-
-    NodeContainer gldnodes;
-
-    //mark market nodes for fncs app installation.
-    //gldnodes.Add(markCon);
-    //gldnodes.Add(csma[0].Get(21));
-
-    {
-        //add the CMSA nodes
-        int installNodeCount=totalNumberOfNodes/20;
-        int i=0;
-        for(;i<installNodeCount;i++)
-            for(int j=1;j<21;j++){
-                gldnodes.Add(csma[i].Get(j));
+        NodeContainer gldnodes;
+        for(int i=0;i<groups;i++){
+            for (int j=1; j<21; ++j) {
+                gldnodes.Add(model->csma[i].Get(j));
             }
-        installNodeCount=totalNumberOfNodes%20;
-        for(int l=0;l<installNodeCount;l++){
-            gldnodes.Add(csma[i].Get(l));
-        }//i goes out of scope so I can reuse it later.
-    }
-
-    /* Set up a vector containing names of all objects on the network */
-    /* The lits includes market names and all controller names */
-    vector<string> names;
-
-    stringstream ss;
-
-    //add market names
-    for(int i=0;i<networks.size();i++){
-        names.push_back(networks[i]->marketname);
-    }
-
-    //add houses
-    for(int i=0;i<networks.size();i++){
-        for(int k=1;k<=networks[i]->numberofnodes;k++){
-            ss << networks[i]->nodeNamePrefixes << k;
-            names.push_back(ss.str());
-            //cout << ss.str() << endl;
-            ss.str(std::string());
         }
+
+        /* the '1' below is the offset where number of nodes begins */
+        FncsApplicationHelper help(model->nodeNamePrefixes, 1);
+        fncsaps.Add(help.Install(gldnodes));
+        fncsaps.Add(help.Install(model->market.Get(0), model->marketname));
     }
 
-    /* the '1' below is the offset where number of nodes begins */
-    FncsApplicationHelper help(networks[0]->nodeNamePrefixes, 1);
-    /* Passes the names of all nodes/objects on the network, and list of all nodes*/ 
-    /* Calls fncs application helper object ( defined in ns3home/src/applications/helper/fncsApplicationHelper.
-     * This creates a map of (name,ipaddreses) and links it to the list <FNCS_applications> contained in teh ApplicationContainer fncsaps */
-    ApplicationContainer fncsaps= help.Install(gldnodes);
-    {
-        size_t index = 0;
-        for (NodeContainer::Iterator i = markCon.Begin();
-                i != markCon.End();
-                ++i)
-        {
-            fncsaps.Add(help.Install(*i, networks[index++]->marketname));
-        }
-    }
     fncsaps.Start (Seconds (0.0));
     fncsaps.Stop (Seconds (259200.0));
 
     Simulator::Run ();
     Simulator::Destroy ();
 }
+
