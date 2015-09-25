@@ -151,7 +151,6 @@ int main (int argc, char *argv[])
         for(int i=0;i<groups;i++){
             stringstream ip;
             ip << "10." << netIndex << "." << i << ".0";
-            cout << ip.str() << endl;
 
             csmaDevices[i] = chelper.Install(model->csma[i]);
 
@@ -166,11 +165,9 @@ int main (int argc, char *argv[])
         phelper3.SetChannelAttribute ("Delay", StringValue ("2ms"));
 
         //connect market nodes to csma nodes.
-        cout << "market node IP addresses" << endl;
         for(int i=0;i<groups;i++){
             stringstream ip;
             ip << "11." << netIndex << "." << i << ".0";
-            cout << ip.str() << endl;
 
             NetDeviceContainer csma1dbell1=phelper3.Install(
                     model->market.Get(0), model->csma[i].Get(0));
