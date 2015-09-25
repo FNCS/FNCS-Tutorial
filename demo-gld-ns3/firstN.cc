@@ -154,7 +154,8 @@ main (int argc, char *argv[])
 
     for(int i=0;i<createNodes;i++){
         stringstream ip;
-        ip << "10.1." << i << ".0";
+        ip << "10." << i/255 << "." << i%255 << ".0";
+        cout << ip.str() << endl;
 
         csmaDevices[i]=chelper.Install(csma[i]);
 
@@ -169,10 +170,12 @@ main (int argc, char *argv[])
     phelper3.SetChannelAttribute ("Delay", StringValue ("2ms"));
 
     //connect market nodes to csma nodes.
+    cout << "market node IP addresses" << endl;
     for(int j=0;j<networks.size();j++){
         for(int i=0;i<createNodes;i++){
             stringstream ip;
-            ip << "11." << j+1 << "." << i+1 << ".0";
+            ip << 11+j << "." << i/255 << "." << i%255 << ".0";
+            cout << ip.str() << endl;
 
             NetDeviceContainer csma1dbell1=phelper3.Install(markCon.Get(j),csma[i].Get(0));
 
