@@ -11,4 +11,4 @@ simB: simB.cpp
 	$(CXX) simB.cpp -o simB $(CPPFLAGS) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f simA simB
+	rm -f simA simB *.out *.log *.txt
