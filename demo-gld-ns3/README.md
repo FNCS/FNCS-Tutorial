@@ -156,7 +156,7 @@ Get the FNCS2 software and install it using the following steps:
 cd $HOME
 
 # download FNCS2
-git clone https://github.com/GridOPTICS/FNCS2
+git clone https://github.com/FNCS/fncs
 
 # change to FNCS2 directory
 cd FNCS2
@@ -227,7 +227,7 @@ cd gridlab-d-797
 # autoconf 2.63
 # automake 1.11
 # libtool 2.2.6b
-autoreconf -fi
+autoreconf -if
 
 # configure, make, and make install 
 ./configure --prefix=$FNCS2_INSTALL --with-xerces=$FNCS2_INSTALL --with-fncs=$FNCS2_INSTALL
@@ -258,14 +258,14 @@ steps:
 cd $HOME
 
 # download our FNCS2 version of ns-3
-git clone https://github.com/GridOPTICS/FNCS2-ns-allinone-3.22
+git clone https://github.com/FNCS/ns-3.24
 
 # change to FNCS2-ns-allinone-3.22 directory
-cd FNCS2-ns-allinone-3.22
+cd FNCS2-ns-allinone-3.24
 
 # the "allinone" package contains ns-3 utilities we do not use;
-# we begin our install from the ns-3.22 directory
-cd ns-3.22
+# we begin our install from the ns-3.24 directory
+cd ns-3.24
 
 # the ns-3 install typically uses the compiler flag for
 # warnings-as-errors which often broke our ability to build and install
