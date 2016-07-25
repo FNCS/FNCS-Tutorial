@@ -44,7 +44,7 @@ FNCS2 and related software packages.
   - ZeroMQ (3.2.x)
   - CZMQ (3.0.x)
 - GridLAB-D (ticket 797)
-  - Xerces (3.1.1)
+  - Xerces (3.1.4)
   - autoconf (2.63 or better)
   - automake (1.11 or better)
   - libtool (2.2.6b or better)
@@ -54,14 +54,18 @@ FNCS2 and related software packages.
   - FNCS2
 
 It will be assumed that you will be installing all software into
-$HOME/FNCS2-install. Doing so will greatly simplify the steps of this
+$HOME/FNCS2_install. Doing so will greatly simplify the steps of this
 tutorial since we can set $LD_LIBRARY_PATH and $PATH accordingly, as
 well as any other needed installation paths while building many of the
-involved software packages. In fact, now would be a good time to set a
+involved software packages. 
+
+If you install this software along with GridLAB-D and NS-3 in Fedora, you have to check whether or not the library files of all these software are created in the same "lib" folder of FNCS2_install. During installation of NS-3 in Fedora, another folder "lib64" might be created and all library files of NS-3 could be created in that folder. However, library files of GridLAB-D and FNCS2 might be created in the folder "lib". In that case, you have to set $LD_LIBRARY_PATH accordingly.
+
+In fact, now would be a good time to set a
 shortcut environment variable, like so:
 
 ```
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS2_INSTALL="$HOME/FNCS2_install"
 ```
 
 NOTE: You could, in theory, change this to point to wherever you wish to
@@ -178,14 +182,14 @@ http://xerces.apache.org/xerces-c/
 # we are doing everything from your $HOME directory
 cd $HOME
 
-# download Xerces-C++ 3.1.1 source code
-wget http://apache.mirrors.pair.com//xerces/c/3/sources/xerces-c-3.1.1.tar.gz
+# download Xerces-C++ 3.1.4 source code
+wget http://apache.claz.org//xerces/c/3/sources/xerces-c-3.1.4.tar.gz
 # if you do not have wget, use
-# curl -O http://apache.mirrors.pair.com//xerces/c/3/sources/xerces-c-3.1.1.tar.gz
+# curl -O http://apache.claz.org//xerces/c/3/sources/xerces-c-3.1.4.tar.gz
 
 # unpack xerces, change to its directory
-tar -xzf xerces-c-3.1.1.tar.gz
-cd xerces-c-3.1.1
+tar -xzf xerces-c-3.1.4.tar.gz
+cd xerces-c-3.1.4
 
 # configure, make, and make install 
 ./configure --prefix=$FNCS2_INSTALL
@@ -227,10 +231,12 @@ cd gridlab-d-797
 # autoconf 2.63
 # automake 1.11
 # libtool 2.2.6b
-autoreconf -fi
+autoreconf -if
 
 # configure, make, and make install 
 ./configure --prefix=$FNCS2_INSTALL --with-xerces=$FNCS2_INSTALL --with-fncs=$FNCS2_INSTALL
+
+# Before making GridLAB-D, go to the "gridlab-d-797" directory and edit "Makefile". Replace -O2 with #-O2 in that file. Now you # are ready to make GridLAB-D.
 make
 make install
 ```
@@ -245,7 +251,7 @@ http://www.nsnam.org/
 ns-3 is a discrete-event network simulator for Internet systems. Please
 see their website for complete details.
 
-We added a FNCS2 "application" as a patch to ns-3.22. Our application
+We added a FNCS2 "application" as a patch to ns-3.24. Our application
 receives FNCS2 messages from GridLAB-D and injects them into the network,
 and once through the network (if not dropped), sends the FNCS2 message on
 to its intended recipient.
@@ -258,14 +264,10 @@ steps:
 cd $HOME
 
 # download our FNCS2 version of ns-3
-git clone https://github.com/GridOPTICS/FNCS2-ns-allinone-3.22
+git clone https://github.com/FNCS/ns-3.24.git
 
-# change to FNCS2-ns-allinone-3.22 directory
-cd FNCS2-ns-allinone-3.22
-
-# the "allinone" package contains ns-3 utilities we do not use;
-# we begin our install from the ns-3.22 directory
-cd ns-3.22
+# we begin our install from the ns-3.24 directory
+cd ns-3.24
 
 # the ns-3 install typically uses the compiler flag for
 # warnings-as-errors which often broke our ability to build and install
@@ -275,7 +277,7 @@ CFLAGS="-g -O2" CXXFLAGS="-g -O2" ./waf configure --prefix=$FNCS2_INSTALL --with
 # 'make'
 ./waf build
 
-# insatll
+# install
 ./waf install
 ```
 
@@ -298,7 +300,7 @@ original file as linked above.
 ```Bash
 #!/bin/sh
 
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS2_INSTALL="$HOME/FNCS2_install"
 
 # update LD_LIBRARY_PATH
 if test "x$LD_LIBRARY_PATH" = x
@@ -315,6 +317,11 @@ then
 else
     export PATH="$FNCS2_INSTALL/bin:$PATH"
 fi
+
+export FNCS_LOG_STDOUT=yes
+export FNCS_LOG_FILE=yes
+export FNCS_LOG_LEVEL=DEBUG4
+export FNCS_RT_CHECK=yes
 ```
 
 ## Model Description
@@ -405,7 +412,7 @@ versions of GridLAB-D and ns-3 i.e. all of the software mentioned above.
 We will use the current directory of the tutorial as the working
 directory for our co-simulation.  Each simulator software package will
 generate output files, as usual, to the current working directory. In
-addition, we have may have added own diagnostic output to standard
+addition, we may have added own diagnostic output to standard
 output (the terminal). The simulators are designed to locate files from
 the working directory, for example, as inputs.
 
@@ -416,6 +423,16 @@ demo. Start by compiling the ns-3 model.
 ```bash
 ./compile-ns3.sh firstN.cc
 ```
+If you can't compile ns-3 model firstN.cc properly by this way with the help of a shell script compile-ns3.sh, you can follow an alternative way which is as follows:
+1. Copy firstN.cc from the demo-gld-ns3 directory and paste it to the scratch folder of ns-3.24
+2. In the terminal, go to the ns-3.24 directory and run firstN.cc
+   cd ns-3.24
+   ./waf --run scratch/firstN
+3. A compiled file of firstN.cc shall be created in ns-3.24/build/scratch location. 
+4. Copy the file firstN from that location and paste it to the demo-gld-ns3 directory.
+ 
+Now you can run our handy script to run the demo model.
+./run_test.sh
 
 If we didn't already have a handy script for you this time around to run
 the demo, instead you would need to manually open up three terminal
@@ -447,21 +464,21 @@ fncs_broker 2
 As mentioned above, we have a useful script for running all of the
 simulators and the broker in separate windows. This assumes you have
 followed the installation process exactly as documented. No need to
-source the FNCS2_env.sh file because it is embedded into the run.sh
-script. The run.sh script will set up your environment for you and then
+source the FNCS2_env.sh file because it is embedded into the run_test.sh
+script. The run_test.sh script will set up your environment for you and then
 run 'xterm' once for each of the simulators and the broker. xterm
 instances should start appearing on your desktop. If you only see a
 subset of the xterm windows, chances are they are overlapping so you
 will need to drag them around your desktop to reveal hidden ones.
 
 In either the terminals you manually created or in the ones created for
-you by the run.sh script, you should start seeing (in addition to the
+you by the run_test.sh script, you should start seeing (in addition to the
 usual output from any of the simulators like GridLAB-D) our diagnostic
 messages coming from each simulator (note that fncs_broker is silent).
 
 Once one of the simulators reaches the end of their simulated time, or
 if you manually terminate any of them using Ctrl+C, all of the
-simulators should stop. If you have used the run.sh script, this should
+simulators should stop. If you have used the run_test.sh script, this should
 also automatically close the xterm sessions.
 
 What you do with the output from this co-simulation is really up to you,
