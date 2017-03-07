@@ -1,5 +1,5 @@
-CPPFLAGS = -I$(FNCS2_INSTALL)/include
-LDFLAGS = -L$(FNCS2_INSTALL)/lib
+CPPFLAGS = -I$(FNCS_INSTALL)/include
+LDFLAGS = -L$(FNCS_INSTALL)/lib
 LIBS = -lfncs -lczmq -lzmq
 
 all: simA simB

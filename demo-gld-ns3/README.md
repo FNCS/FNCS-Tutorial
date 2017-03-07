@@ -1,6 +1,6 @@
-# FNCS2-Tutorial GridLAB-D and ns-3
+# FNCS-Tutorial GridLAB-D and ns-3
 
-Step-by-step guide for building and running FNCS2, ns-3, and GridLAB-D.
+Step-by-step guide for building and running FNCS, ns-3, and GridLAB-D.
 
 This guide will walk you through installing and running a preliminary
 use case: running a single instance of GridLAB-D and realistically
@@ -11,7 +11,7 @@ delaying and routing messages through ns-3.
 - [Software and Dependencies](#software-and-dependencies)
   - [ZeroMQ Installation](#zeromq-installation)
   - [CZMQ Installation](#czmq-installation)
-  - [FNCS2 Installation](#fncs-installation)
+  - [FNCS Installation](#fncs-installation)
   - [Xerces-C++ Installation](#xerces-c-installation)
   - [GridLAB-D Installation](#gridlab-d-installation)
   - [ns-3 Installation](#ns-3-installation)
@@ -28,7 +28,7 @@ operating system.  Our developers have used RedHat EL5 as well as Ubuntu
 has not been built or tested on Windows. Although all of the software
 packages and their dependencies are known to have Windows installers, we
 have not yet developed any way to patch those official distributions
-with FNCS2 enhancements.
+with FNCS enhancements.
 
 ## Software and Dependencies
 [back to contents](#table-of-contents)
@@ -38,9 +38,9 @@ prerequisite software. The following software will be covered,
 indicating the primary software installed and the list of dependencies:
 
 You will need to install git in order to clone (checkout) all of our
-FNCS2 and related software packages.
+FNCS and related software packages.
 
-- FNCS2
+- FNCS
   - ZeroMQ (3.2.x)
   - CZMQ (3.0.x)
 - GridLAB-D (ticket 797)
@@ -48,24 +48,24 @@ FNCS2 and related software packages.
   - autoconf (2.63 or better)
   - automake (1.11 or better)
   - libtool (2.2.6b or better)
-  - FNCS2
-- ns-3 (our version based on 3.22)
+  - FNCS
+- ns-3 (our version based on 3.26)
   - Python (for the waf installer)
-  - FNCS2
+  - FNCS
 
 It will be assumed that you will be installing all software into
-$HOME/FNCS2-install. Doing so will greatly simplify the steps of this
+$HOME/FNCS-install. Doing so will greatly simplify the steps of this
 tutorial since we can set $LD_LIBRARY_PATH and $PATH accordingly, as
 well as any other needed installation paths while building many of the
 involved software packages. In fact, now would be a good time to set a
 shortcut environment variable, like so:
 
 ```
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS_INSTALL="$HOME/FNCS-install"
 ```
 
 NOTE: You could, in theory, change this to point to wherever you wish to
-install FNCS2 and all related software packages.
+install FNCS and all related software packages.
 
 It is also assumed that you are using a Bourne shell; all of the
 step-by-step instructions (like the one above) that appear in this
@@ -78,7 +78,7 @@ variables are set.
 
 http://zeromq.org/
 
-The ZeroMQ library is the only library that our FNCS2 library depends on.
+The ZeroMQ library is the only library that our FNCS library depends on.
 We have extensively tested our software using version 3.2.x, however
 later versions may also work but have not yet been tested.
 
@@ -98,7 +98,7 @@ tar -xzf zeromq-3.2.4.tar.gz
 cd zeromq-3.2.4
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL
 make
 make install
 ```
@@ -129,45 +129,45 @@ tar -xzf czmq-3.0.0-rc1.tar.gz
 cd czmq-3.0.0
 
 # configure, make, and make install
-./configure --prefix=$HOME/FNCS2_install --with-libzmq=$HOME/FNCS2_install
+./configure --prefix=$HOME/FNCS_install --with-libzmq=$HOME/FNCS_install
 make
 make install
 ```
 
 Congratulations, you have now installed CZMQ. 
 
-## FNCS2 Installation
+## FNCS Installation
 [back to contents](#table-of-contents)
 
-https://github.com/GridOPTICS/FNCS2
+https://github.com/FNCS/fncs
 
-The FNCS2 software will build and install the FNCS2 library, the various
-FNCS2 header files, as well as the broker application. The FNCS2 broker
+The FNCS software will build and install the FNCS library, the various
+FNCS header files, as well as the broker application. The FNCS broker
 represents the central server that all other simulator clients will
 connect to in order to synchronize in time and exchange messages with
-other simulators. The FNCS2 library and header represent the needed API
+other simulators. The FNCS library and header represent the needed API
 for communicating with the broker using the sync and messaging function
 calls.
 
-Get the FNCS2 software and install it using the following steps:
+Get the FNCS software and install it using the following steps:
 
 ```
 # we are doing everything from your $HOME directory
 cd $HOME
 
-# download FNCS2
-git clone https://github.com/GridOPTICS/FNCS2
+# download FNCS
+git clone https://github.com/FNCS/fncs
 
-# change to FNCS2 directory
-cd FNCS2
+# change to FNCS directory
+cd FNCS
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL --with-zmq=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL --with-zmq=$FNCS_INSTALL
 make
 make install
 ```
 
-Congratulations, you have now installed FNCS2.
+Congratulations, you have now installed FNCS.
 
 ## Xerces-C++ Installation
 [back to contents](#table-of-contents)
@@ -188,7 +188,7 @@ tar -xzf xerces-c-3.1.1.tar.gz
 cd xerces-c-3.1.1
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL
 make
 make install
 ```
@@ -204,9 +204,9 @@ http://www.gridlabd.org/
 GridLAB-D is a power distribution system simulator and analysis tool.
 Please see its website for complete details.
 
-Our FNCS2 modifications are part of ticket 797
+Our FNCS modifications are part of ticket 797
 (http://svn.code.sf.net/p/gridlab-d/code/ticket/797).
-Please use our FNCS2-ified version of GridLAB-D.
+Please use our FNCS-ified version of GridLAB-D.
 
 Get our version of the GridLAB-D software and install it using the
 following steps:
@@ -215,10 +215,10 @@ following steps:
 # we are doing everything from your $HOME directory
 cd $HOME
 
-# download our FNCS2-capable version of GridLAB-D
+# download our FNCS-capable version of GridLAB-D
 svn co http://svn.code.sf.net/p/gridlab-d/code/ticket/797 gridlab-d-797
 
-# change to FNCS2-gridlab-d directory
+# change to FNCS-gridlab-d directory
 cd gridlab-d-797
 
 # run to autotools to generate the configure script and Makefile.in
@@ -230,7 +230,7 @@ cd gridlab-d-797
 autoreconf -fi
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL --with-xerces=$FNCS2_INSTALL --with-fncs=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL --with-xerces=$FNCS_INSTALL --with-fncs=$FNCS_INSTALL
 make
 make install
 ```
@@ -245,9 +245,9 @@ http://www.nsnam.org/
 ns-3 is a discrete-event network simulator for Internet systems. Please
 see their website for complete details.
 
-We added a FNCS2 "application" as a patch to ns-3.22. Our application
-receives FNCS2 messages from GridLAB-D and injects them into the network,
-and once through the network (if not dropped), sends the FNCS2 message on
+We added a FNCS "application" as a patch to ns-3.26. Our application
+receives FNCS messages from GridLAB-D and injects them into the network,
+and once through the network (if not dropped), sends the FNCS message on
 to its intended recipient.
 
 Get our version of the ns-3 software and install it using the following
@@ -257,20 +257,16 @@ steps:
 # we are doing everything from your $HOME directory
 cd $HOME
 
-# download our FNCS2 version of ns-3
-git clone https://github.com/GridOPTICS/FNCS2-ns-allinone-3.22
+# download our FNCS version of ns-3
+git clone https://github.com/FNCS/ns-3.26
 
-# change to FNCS2-ns-allinone-3.22 directory
-cd FNCS2-ns-allinone-3.22
-
-# the "allinone" package contains ns-3 utilities we do not use;
-# we begin our install from the ns-3.22 directory
-cd ns-3.22
+# change to ns-3.26 directory
+cd ns-3.26
 
 # the ns-3 install typically uses the compiler flag for
 # warnings-as-errors which often broke our ability to build and install
 # it, so we recommend the following configure of ns-3
-CFLAGS="-g -O2" CXXFLAGS="-g -O2" ./waf configure --prefix=$FNCS2_INSTALL --with-fncs=$FNCS2_INSTALL --with-zmq=$FNCS2_INSTALL --disable-python
+CFLAGS="-g -O2" CXXFLAGS="-g -O2" ./waf configure --prefix=$FNCS_INSTALL --with-fncs=$FNCS_INSTALL --with-zmq=$FNCS_INSTALL --disable-python
 
 # 'make'
 ./waf build
@@ -285,12 +281,12 @@ of it.
 ## Important Environment Variables
 [back to contents](#table-of-contents)
 
-Now that all of the FNCS2 and related software is installed, now would be
+Now that all of the FNCS and related software is installed, now would be
 a great time to set some important environment variables. If you have
 been following the steps exactly, then you can copy-and-paste the
 following into a handy shell script that you can source before running
 the co-simulation. If you are reading this file from the github sources,
-you will find the file [here](FNCS2_env.sh).
+you will find the file [here](FNCS_env.sh).
 
 Here is what the file recently looked like, but please refer to the
 original file as linked above.
@@ -298,22 +294,22 @@ original file as linked above.
 ```Bash
 #!/bin/sh
 
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS_INSTALL="$HOME/FNCS-install"
 
 # update LD_LIBRARY_PATH
 if test "x$LD_LIBRARY_PATH" = x
 then
-    export LD_LIBRARY_PATH="$FNCS2_INSTALL/lib"
+    export LD_LIBRARY_PATH="$FNCS_INSTALL/lib"
 else
-    export LD_LIBRARY_PATH="$FNCS2_INSTALL/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$FNCS_INSTALL/lib:$LD_LIBRARY_PATH"
 fi
 
 # update PATH
 if test "x$PATH" = x
 then
-    export PATH="$FNCS2_INSTALL/bin"
+    export PATH="$FNCS_INSTALL/bin"
 else
-    export PATH="$FNCS2_INSTALL/bin:$PATH"
+    export PATH="$FNCS_INSTALL/bin:$PATH"
 fi
 ```
 
@@ -324,7 +320,7 @@ In this current directory you will find many files, the vast majority of
 them are input files for GridLAB-D.
 
 - Tutorial files
-    - FNCS2_env.sh -- source this file to set up your environment variables
+    - FNCS_env.sh -- source this file to set up your environment variables
     - README.md -- this file
 - GridLAB-D files
     - appliance_schedules.glm
@@ -337,11 +333,11 @@ them are input files for GridLAB-D.
     - tzinfo.txt
     - unitfile.txt
     - water_and_setpoint_schedule_v3.glm
-    - configgld.json -- FNCS2 config file for ns-3
+    - configgld.json -- FNCS config file for ns-3
 - ns-3 files
     - compile-ns3.sh -- our helper script for compiling ns-3 model
     - firstN.cc -- the ns-3 model source file
-    - configns3.json -- FNCS2 config file for ns-3
+    - configns3.json -- FNCS config file for ns-3
 
 ### GridLAB-D Model
 Our GridLAB-D model consists of 300 houses. Some of the houses
@@ -351,14 +347,14 @@ sorted, and from them a price signal is broadcast back out to the
 participating homes. The bids as well as the price signal are
 communicated through the ns-3 model to realistically delay the messages.
 
-To get GridLAB-D to work with FNCS2, we needed to modify how it processes
+To get GridLAB-D to work with FNCS, we needed to modify how it processes
 time. For details, see the core/exec.c and core/main.c files in our
 custom distribution of GridLAB-D. In order for houses to communicate
 with the auction, we created a new GridLAB-D module called "comm", the
 source code for which can be found in the communications directory can
 in our custom GridLAB-D distribution. Within the comm module we created
 the "market network interface" as well as the "controller network
-interface" classes which create, send, and receive FNCS2 Messages between
+interface" classes which create, send, and receive FNCS Messages between
 them.
 
 Figuring out how to control time within GridLAB-D was challenging,
@@ -379,18 +375,18 @@ of houses in the GridLAB-D model and the name prefix for the houses. The
 single input file [LinkModelGLDNS3.txt](LinkModelGLDNS3.txt) provides
 this information to our ns-3 model.
 
-To get ns-3 to work with FNCS2, we created a new ns-3 FNCS2 "application".
+To get ns-3 to work with FNCS, we created a new ns-3 FNCS "application".
 Applications are associated with individual nodes. Each node holds a
 list of references to its applications. In other words, a node in ns-3
 on its own doesn't do anything, rather it must have one or more
-applications running on the node. Our FNCS2 application listens for
-FNCS2
-messages. Upon receiving a FNCS2 message, a FNCS2 application running at a
+applications running on the node. Our FNCS application listens for
+FNCS
+messages. Upon receiving a FNCS message, a FNCS application running at a
 node injects the message into the simulated network at its node. The
 ns-3 model routes the message appropriately, realistically delaying its
-transmission, and then the FNCS2 application instance running on the
+transmission, and then the FNCS application instance running on the
 destination node in the network reads the message once it arrives and
-sends it back to the FNCS2 broker so it can be sent back to the
+sends it back to the FNCS broker so it can be sent back to the
 destination simulator.
 
 It may sound complicated, but it's really not so different from our
@@ -399,7 +395,7 @@ simple network simulator from the second tutorial.
 ## Running the Co-Simulation
 [back to contents](#table-of-contents)
 
-The rest of this tutorial assumes that you have installed FNCS2 and our
+The rest of this tutorial assumes that you have installed FNCS and our
 versions of GridLAB-D and ns-3 i.e. all of the software mentioned above.
 
 We will use the current directory of the tutorial as the working
@@ -409,7 +405,7 @@ addition, we have may have added own diagnostic output to standard
 output (the terminal). The simulators are designed to locate files from
 the working directory, for example, as inputs.
 
-If you have sourced the FNCS2_env.sh file and installed the softare as we
+If you have sourced the FNCS_env.sh file and installed the softare as we
 had indicated, you should be ready to compile the ns-3 model and run the
 demo. Start by compiling the ns-3 model.
 
@@ -447,7 +443,7 @@ fncs_broker 2
 As mentioned above, we have a useful script for running all of the
 simulators and the broker in separate windows. This assumes you have
 followed the installation process exactly as documented. No need to
-source the FNCS2_env.sh file because it is embedded into the run.sh
+source the FNCS_env.sh file because it is embedded into the run.sh
 script. The run.sh script will set up your environment for you and then
 run 'xterm' once for each of the simulators and the broker. xterm
 instances should start appearing on your desktop. If you only see a

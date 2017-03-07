@@ -1,6 +1,6 @@
-FNCS2-Tutorial
-==============
-Welcome to the Framework for Network Co-Simulation 2 (FNCS2) Tutorial.
+FNCS-Tutorial
+=============
+Welcome to the Framework for Network Co-Simulation (FNCS) Tutorial.
 This tutorial features four step-by-step guides that target the basics
 ('two-simulators'), a modestly complex transactive control
 application ('GridLAB-D+ns-3'), and a fully-featured transactive control

@@ -1,6 +1,6 @@
-# FNCS2-Tutorial Two Simulators
+# FNCS-Tutorial Two Simulators
 
-Step-by-step guide for building and running FNCS2 with two small
+Step-by-step guide for building and running FNCS with two small
 power simulator applications.
 
 ## Table of Contents
@@ -8,7 +8,7 @@ power simulator applications.
 - [Software and Dependencies](#software-and-dependencies)
   - [ZeroMQ Installation](#zeromq-installation)
   - [CZMQ Installation](#czmq-installation)
-  - [FNCS2 Installation](#fncs-installation)
+  - [FNCS Installation](#fncs-installation)
 - [Important Environment Variables](#important-environment-variables)
 - [Model Description](#model-description)
 - [Running the Co-Simulation](#running-the-co-simulation)
@@ -23,7 +23,7 @@ operating system.  Our developers have used RedHat EL5 as well as Ubuntu
 has not been built or tested on Windows. Although all of the software
 packages and their dependencies are known to have Windows installers, we
 have not yet developed any way to patch those official distributions
-with FNCS2 enhancements.
+with FNCS enhancements.
 
 ## Software and Dependencies
 [back to contents](#table-of-contents)
@@ -33,25 +33,25 @@ prerequisite software. The following software will be covered,
 indicating the primary software installed and the list of dependencies:
 
 You will need to install git in order to clone (checkout) all of our
-FNCS2 and related software packages.
+FNCS and related software packages.
 
-- FNCS2
+- FNCS
   - ZeroMQ (3.2.x)
   - CZMQ (3.0.x)
 
 It will be assumed that you will be installing all software into
-$HOME/FNCS2-install. Doing so will greatly simplify the steps of this
+$HOME/FNCS-install. Doing so will greatly simplify the steps of this
 tutorial since we can set $LD_LIBRARY_PATH and $PATH accordingly, as
 well as any other needed installation paths while building many of the
 involved software packages. In fact, now would be a good time to set a
 shortcut environment variable, like so:
 
 ```
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS_INSTALL="$HOME/FNCS-install"
 ```
 
 NOTE: You could, in theory, change this to point to wherever you wish to
-install FNCS2 and all related software packages.
+install FNCS and all related software packages.
 
 It is also assumed that you are using a Bourne shell; all of the
 step-by-step instructions (like the one above) that appear in this
@@ -64,7 +64,7 @@ variables are set.
 
 http://zeromq.org/
 
-The ZeroMQ library is one library that our FNCS2 library depends on.
+The ZeroMQ library is one library that our FNCS library depends on.
 We have extensively tested our software using version 3.2.x, however
 later versions may also work but have not yet been tested.
 
@@ -84,7 +84,7 @@ tar -xzf zeromq-3.2.5.tar.gz
 cd zeromq-3.2.5
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL
 make
 make install
 ```
@@ -118,50 +118,50 @@ cd czmq-3.0.2
 ./autogen.sh
 
 # configure, make, and make install
-./configure --prefix=$HOME/FNCS2_install --with-libzmq=$HOME/FNCS2_install
+./configure --prefix=$HOME/FNCS_install --with-libzmq=$HOME/FNCS_install
 make
 make install
 ```
 
 Congratulations, you have now installed CZMQ. 
 
-### FNCS2 Installation
+### FNCS Installation
 [back to contents](#table-of-contents)
 
-https://github.com/GridOPTICS/FNCS2
+https://github.com/FNCS/fncs
 
-The FNCS2 software will build and install the FNCS2 library, the various
-FNCS2 header files, as well as the broker application. The FNCS2 broker
+The FNCS software will build and install the FNCS library, the various
+FNCS header files, as well as the broker application. The FNCS broker
 represents the central server that all other simulator clients will
 connect to in order to synchronize in time and exchange messages with
-other simulators. The FNCS2 library and header represent the needed API
+other simulators. The FNCS library and header represent the needed API
 for communicating with the broker using the sync and messaging function
 calls.
 
-Get the FNCS2 software and install it using the following steps:
+Get the FNCS software and install it using the following steps:
 
 ```
 # we are doing everything from your $HOME directory
 cd $HOME
 
-# download FNCS2
-git clone https://github.com/GridOPTICS/FNCS2
+# download FNCS
+git clone https://github.com/FNCS/fncs
 
-# change to FNCS2 directory
-cd FNCS2
+# change to FNCS directory
+cd FNCS
 
 # configure, make, and make install 
-./configure --prefix=$FNCS2_INSTALL --with-zmq=$FNCS2_INSTALL --with-czmq=$FNCS2_INSTALL
+./configure --prefix=$FNCS_INSTALL --with-zmq=$FNCS_INSTALL --with-czmq=$FNCS_INSTALL
 make
 make install
 ```
 
-Congratulations, you have now installed FNCS2.
+Congratulations, you have now installed FNCS.
 
 ## Important Environment Variables
 [back to contents](#table-of-contents)
 
-Now that all of the FNCS2 and related software is installed, now would be
+Now that all of the FNCS and related software is installed, now would be
 a great time to set some important environment variables. If you have
 been following the steps exactly, then you can copy-and-paste the
 following into a handy shell script that you can source before running
@@ -174,22 +174,22 @@ original file as linked above.
 ```Bash
 #!/bin/sh
 
-export FNCS2_INSTALL="$HOME/FNCS2-install"
+export FNCS_INSTALL="$HOME/FNCS-install"
 
 # update LD_LIBRARY_PATH for all but MCR
 if test "x$LD_LIBRARY_PATH" = x
 then
-    export LD_LIBRARY_PATH="$FNCS2_INSTALL/lib"
+    export LD_LIBRARY_PATH="$FNCS_INSTALL/lib"
 else
-    export LD_LIBRARY_PATH="$FNCS2_INSTALL/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$FNCS_INSTALL/lib:$LD_LIBRARY_PATH"
 fi
 
 # update PATH for all but MCR
 if test "x$PATH" = x
 then
-    export PATH="$FNCS2_INSTALL/bin"
+    export PATH="$FNCS_INSTALL/bin"
 else
-    export PATH="$FNCS2_INSTALL/bin:$PATH"
+    export PATH="$FNCS_INSTALL/bin:$PATH"
 fi
 ```
 
@@ -215,7 +215,7 @@ line by line.
 
 #### Boilerplate Setup and Teardown
 You'll notice there is quite a bit of "boilerplate" code -- code
-necessary for simply setting up the simulator and its FNCS2 connection.
+necessary for simply setting up the simulator and its FNCS connection.
 All simulators need the following:
 - A way to tell current simulator time
 - fncs::initialize()
@@ -289,7 +289,7 @@ directory as a working directory for the co-simulation run.
 
 In this directory you will find only a few files since our simulators
 are rather simple.  You will find the necessary ZPL files that each
-simulator needs to pass information to the FNCS2 library during
+simulator needs to pass information to the FNCS library during
 initialization.  There is also a handy script file for starting the
 co-simulation [run.sh](run.sh).  All runtime files will be described in
 detail next.
@@ -313,7 +313,7 @@ simulators connecting to the broker is its only parameter.
 [back to contents](#table-of-contents)
 
 Please note that this is a simplified co-simulation meant to demonstrate
-how to use FNCS2. As such, the output will verify that FNCS2 is working
+how to use FNCS. As such, the output will verify that FNCS is working
 correctly. The generated stdout file simB.out shows that the simulator
 was interrupted when a new message arrived -- simB continuously requests
 to step forward two time steps, but the request returns the next

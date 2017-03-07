@@ -4,10 +4,10 @@ g++ \
 -g \
 -o firstN \
 firstN.cc \
--I$FNCS2_INSTALL/include \
--I$FNCS2_INSTALL/include/fncs \
--I$FNCS2_INSTALL/include/ns3.22 \
--L$FNCS2_INSTALL/lib \
+-I$FNCS_INSTALL/include \
+-I$FNCS_INSTALL/include/fncs \
+-I$FNCS_INSTALL/include/ns3.22 \
+-L$FNCS_INSTALL/lib \
 -lns3.22-applications-debug \
 -lns3.22-fncs-debug \
 -lns3.22-nix-vector-routing-debug \
