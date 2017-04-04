@@ -44,7 +44,6 @@ using namespace std;
 
 struct MarketModel{
     string nodeNamePrefixes;
-    string connectedBus;
     int numberofnodes;
     int numberofgroups;
     string marketname;       
@@ -64,8 +63,7 @@ vector<MarketModel*> parseLinkModel(string name) {
         toAdd=new MarketModel();
         inputFile >> toAdd->numberofnodes
             >> toAdd->marketname
-            >> toAdd->nodeNamePrefixes
-            >> toAdd->connectedBus;
+            >> toAdd->nodeNamePrefixes;
         toAdd->numberofgroups = (toAdd->numberofnodes+19)/20;
         if(toAdd->numberofnodes==0) //ifstream zicti
             continue;
