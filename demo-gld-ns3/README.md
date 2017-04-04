@@ -49,7 +49,7 @@ FNCS and related software packages.
   - automake (1.11 or better)
   - libtool (2.2.6b or better)
   - FNCS
-- ns-3 (our version based on 3.22)
+- ns-3 (our version based on 3.26)
   - Python (for the waf installer)
   - FNCS
 
@@ -246,7 +246,7 @@ http://www.nsnam.org/
 ns-3 is a discrete-event network simulator for Internet systems. Please
 see their website for complete details.
 
-We added a FNCS "application" as a patch to ns-3.22. Our application
+We added a FNCS "application" as a patch to ns-3.26. Our application
 receives FNCS messages from GridLAB-D and injects them into the network,
 and once through the network (if not dropped), sends the FNCS message on
 to its intended recipient.
@@ -259,10 +259,10 @@ steps:
 cd $HOME
 
 # download our FNCS version of ns-3
-git clone https://github.com/FNCS/ns-3.22
+git clone https://github.com/FNCS/ns-3.26
 
-# change to ns3.22 directory
-cd ns-3.22
+# change to ns-3.26 directory
+cd ns-3.26
 
 # the ns-3 install typically uses the compiler flag for
 # warnings-as-errors which often broke our ability to build and install
@@ -333,6 +333,7 @@ them are input files for GridLAB-D.
     - tzinfo.txt
     - unitfile.txt
     - water_and_setpoint_schedule_v3.glm
+    - configgld.json -- FNCS config file for ns-3
 - ns-3 files
     - compile-ns3.sh -- our helper script for compiling ns-3 model
     - firstN.cc -- the ns-3 model source file
