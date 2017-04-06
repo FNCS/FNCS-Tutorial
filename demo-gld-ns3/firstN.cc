@@ -46,7 +46,7 @@ struct MarketModel{
     string nodeNamePrefixes;
     int numberofnodes;
     int numberofgroups;
-    string marketname;       
+    string marketname;
     vector<NodeContainer> csma;
     NodeContainer market;
 };
@@ -69,7 +69,7 @@ vector<MarketModel*> parseLinkModel(string name) {
             continue;
         toReturn.push_back(toAdd);
     }
-    return toReturn; 
+    return toReturn;
 
 }
 
@@ -83,7 +83,7 @@ int main (int argc, char *argv[])
 
     /* reads the list of market models from the linkModel file*/
 
-    /* Each market model is defined by its 
+    /* Each market model is defined by its
      * size (Number of HVAC/controllers)
      * Name of Market (MarkNIF)
      * Prefix of Node Names ( Prefix for controller name)
@@ -116,8 +116,8 @@ int main (int argc, char *argv[])
     Ipv4StaticRoutingHelper staticRouting;
     Ipv4AddressHelper addresses;
     InternetStackHelper ihelper;
-    Ipv4ListRoutingHelper list; 
-    list.Add (staticRouting, 0); 
+    Ipv4ListRoutingHelper list;
+    list.Add (staticRouting, 0);
     list.Add (nixRouting, 10);
     ihelper.SetRoutingHelper (list);
 
@@ -144,7 +144,7 @@ int main (int argc, char *argv[])
 
         ihelper.Install(model->market);
 
-        NetDeviceContainer csmaDevices[groups];
+        NetDeviceContainer *csmaDevices = new NetDeviceContainer[groups];
 
         for(int i=0;i<groups;i++){
             stringstream ip;
@@ -195,4 +195,3 @@ int main (int argc, char *argv[])
     Simulator::Run ();
     Simulator::Destroy ();
 }
-
