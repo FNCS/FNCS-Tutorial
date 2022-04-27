@@ -159,7 +159,7 @@ cd $HOME
 git clone https://github.com/FNCS/fncs
 
 # change to FNCS directory
-cd FNCS
+cd fncs
 
 # configure, make, and make install
 ./configure --prefix=$FNCS_INSTALL --with-zmq=$FNCS_INSTALL
