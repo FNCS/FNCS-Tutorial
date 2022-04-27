@@ -129,7 +129,7 @@ tar -xzf czmq-3.0.0-rc1.tar.gz
 cd czmq-3.0.0
 
 # configure, make, and make install
-./configure --prefix=$HOME/FNCS_install --with-libzmq=$HOME/FNCS_install
+./configure --prefix=$FNCS_INSTALL --with-libzmq=$FNCS_INSTALL
 make
 make install
 ```
